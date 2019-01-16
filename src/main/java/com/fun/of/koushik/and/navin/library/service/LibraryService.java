@@ -8,9 +8,10 @@ package com.fun.of.koushik.and.navin.library.service;
 import com.fun.of.koushik.and.navin.library.model.Book;
 import com.fun.of.koushik.and.navin.library.model.Library;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -20,40 +21,55 @@ import org.springframework.stereotype.Service;
 @Service
 public class LibraryService {
     
-    public void addToStock(Book toAdd){
-        int ilosc=0;
+    @Autowired
+    BookService bookService;
+    
+    public boolean addToStock(long id){
+        Optional<Book> tmp = bookService.getById(id);
+        if(tmp.isPresent()){            
+            return addToStock(tmp.get());
+        } 
+        return false;
+    }
+    public boolean addToStock(Book toAdd){
+        toAdd=bookService.getById(toAdd.getId()).get();
         HashMap<Book, Long> stock = Library.getInstance().getStock();
         if(stock.containsKey(toAdd)){
             Long quantity = stock.get(toAdd);
             if(0==quantity||null==quantity){
-                quantity=1L;
-                ilosc=1;
+                quantity=1L;stock.put(toAdd, quantity);return true;
             }
             else{
                 quantity++;
-                ilosc=quantity.intValue();
             }
             stock.replace(toAdd, quantity);
+            return true;
         }
         else{
             stock.put(toAdd, 1L);
-            ilosc=1;
+            return true;
         }
-        System.out.println("Ilosc po dodaniu: "+ilosc);
     }
-    public void removeFromStock(Book toAdd){
+    public boolean removeFromStock(long id){
+        Optional<Book> tmp = bookService.getById(id);
+        if(tmp.isPresent()){            
+            return removeFromStock(tmp.get());
+        } 
+        return false;
+    }
+    public boolean removeFromStock(Book toAdd){
         HashMap<Book, Long> stock = Library.getInstance().getStock();
-        if(!stock.containsKey(toAdd))return;
+        if(!stock.containsKey(toAdd)){return false;}        
         if(0<stock.get(toAdd)){
             stock.replace(toAdd,stock.get(toAdd)-1);
-            System.out.println("Ilosc po usunieciu: "+stock.get(toAdd));
+            return true;
         }
+        return false;
     }
 
     public Set<String> allOnStock() {
         HashMap<Book, Long> stock = Library.getInstance().getStock();
         return stock.entrySet().stream().filter(es->{return es.getValue()>0;}).map(es->es.getKey().idPlusTitle()).collect(Collectors.toSet()); 
-        //).allMatch(es->es.)//collect((k,v)->{System.out.println(k+v);});
         
     }
 
@@ -63,6 +79,30 @@ public class LibraryService {
                 .filter(es->{return es.getKey().titlePlusAuthors().contains(allByAuthorOrTitle);})
                 .map(es->es.getKey().idPlusTitle())
                 .collect(Collectors.toSet()); 
+    }
+
+    public Set<String> allByAuthor(String author) {
+        HashMap<Book, Long> stock = Library.getInstance().getStock();
+        return stock.entrySet().stream()
+                .filter(es->{return es.getKey().getAuthor().toString().toLowerCase().contains(author);})
+                .map(es->es.getKey().idPlusTitle())
+                .collect(Collectors.toSet()); 
+    }
+
+    public Set<String> allByTitle(String title) {
+        HashMap<Book, Long> stock = Library.getInstance().getStock();
+        return stock.entrySet().stream()
+                .filter(es->{return es.getKey().toString().toLowerCase().contains(title);})
+                .map(es->es.getKey().idPlusTitle())
+                .collect(Collectors.toSet()); 
+    }
+
+    public boolean borrowById(long id) {
+        return removeFromStock(id);
+    }
+
+    public boolean returnById(long id) {
+        return addToStock(id);
     }
     
 }

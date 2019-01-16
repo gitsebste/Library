@@ -7,9 +7,10 @@ package com.fun.of.koushik.and.navin.library.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -39,7 +40,7 @@ public class Author {
 //                CascadeType.REFRESH
 //            },mappedBy = "authors")
     @ManyToMany(mappedBy = "authors",cascade = {
-                CascadeType.PERSIST},fetch = FetchType.LAZY)
+                CascadeType.PERSIST},fetch = FetchType.EAGER)
     private Set<Book> books=new HashSet<>();
 
     public Author() {}
@@ -91,6 +92,53 @@ public class Author {
 
     public void setBooks() {
         books = new HashSet<>();
+    }
+
+    @Override
+    public String toString() {
+        return "Author{" + "firstName=" + firstName + " lastName=" + lastName + "\nbooks=" + books.stream().map(x->x.getTitle()).collect(Collectors.toList()) + '}';
+    }
+
+    
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 29 * hash + Objects.hashCode(this.firstName);
+        hash = 29 * hash + Objects.hashCode(this.lastName);
+        //hash = 29 * hash + Objects.hashCode(this.books);
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        
+        if (obj == null) {
+            return false;
+        }
+        if (this == obj) {
+            return true;
+        }        
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Author other = (Author) obj;
+        if (!Objects.equals(this.firstName, other.firstName)) {
+            return false;
+        }
+        if (!Objects.equals(this.lastName, other.lastName)) {
+            return false;
+        }
+        if(this.hashCode()!=other.hashCode())return false;
+        if( (this.books==null || this.books.isEmpty())&&
+            (other.books==null || other.books.isEmpty()))
+                return true;
+        if(this.books.size()!=other.books.size())return false;
+        return (books.stream()
+                .map(x->x.getId())
+                .allMatch(x ->other.books.stream()
+                        .map(y->y.getId())
+                        .collect(Collectors.toSet()).contains(x)));
     }
   
     

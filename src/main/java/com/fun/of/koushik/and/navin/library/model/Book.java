@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 //import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -33,7 +34,7 @@ public class Book {
     private Long id;
     private String title;
     @ManyToMany(cascade = {
-                CascadeType.PERSIST},fetch = FetchType.LAZY)//(cascade = { CascadeType.ALL })
+                CascadeType.PERSIST},fetch = FetchType.EAGER)//(cascade = { CascadeType.ALL })
     //@Cascade({CascadeType.SAVE_UPDATE})
     //    @JoinTable(
     //        name = "Books_Authors"
@@ -94,29 +95,44 @@ public class Book {
 
     @Override
     public boolean equals(Object obj) {
+        if (obj == null) return false;
         if(!(obj instanceof Book))return false;
         Book other = (Book)obj;
         if(this==other)return true;
         if(this.hashCode()!=other.hashCode())return false;
+        if( (this.authors==null || this.authors.isEmpty())&&
+            (other.authors==null || other.authors.isEmpty()))
+                return true;
         if(this.authors.size()!=other.authors.size())return false;
-        return (authors.stream().allMatch(x ->other.authors.contains(x)));
+        return (authors.stream()
+                .map(x->x.getId())
+                .allMatch(x ->other.authors.stream()
+                        .map(y->y.getId())
+                        .collect(Collectors.toSet()).contains(x)));
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
         hash = 67 * hash + Objects.hashCode(this.title);
-        hash = 67 * hash + Objects.hashCode(this.authors);
+        //hash = 67 * hash + Objects.hashCode(this.authors);
         return hash;
     }
     public String idPlusTitle(){
         return id+" "+title;
     }
     public String titlePlusAuthors(){
-        return authors.stream()
+        return (authors.stream()
                 .map(x->x.getFirstName()+x.getLastName())
-                .reduce("", String::concat)+title;
+                .reduce("", String::concat)+title).toLowerCase();
     }
+
+    @Override
+    public String toString() {
+        return "Book{" + "title=" + title + '}';
+    }
+
+
 
  
     

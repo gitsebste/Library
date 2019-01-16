@@ -27,9 +27,10 @@ public class BookService {
     @Autowired
     LibraryService libraryService;
     
-    public Book add(Book toAdd) {         
+    public Book add(Book toAdd) {      
+        Book ret = bookRepository.save(toAdd);
         libraryService.addToStock(toAdd);
-        return bookRepository.save(toAdd);
+        return ret;
     }
 
 

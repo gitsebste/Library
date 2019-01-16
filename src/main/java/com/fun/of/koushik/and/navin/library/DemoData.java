@@ -37,6 +37,14 @@ public class DemoData {
         authors.add(new Author("Jearl","Walker",null));
 
         bookService.add(new Book("Fundamentals of Physics",authors));
+        authors.clear();
+        authors.add(new Author("Richard","Feynman",null));
+        bookService.add(new Book("The Feynman Lectures on Physics",authors));
+        //Adam Mickiewicz wrote Mr Tadeusz or Tadeusz Mickiewicz wrote Mr Adam
+        //http://localhost:8080/library/mickie
+        authors.clear();
+        authors.add(new Author("Adam","Mickiewicz",null));
+        bookService.add(new Book("Pan Tadeusz",authors));
 
     }
 }
