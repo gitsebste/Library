@@ -36,7 +36,7 @@ public class Library {
     public void setId(int id) {
         this.id = id;
     }
-    
+    //borrowed?
     HashMap<Book, Long>  stock= new HashMap<>();
 
     public HashMap<Book, Long> getStock() {
