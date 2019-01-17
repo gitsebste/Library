@@ -37,13 +37,13 @@ public class Library {
         this.id = id;
     }
     //borrowed?
-    HashMap<Book, Long>  stock= new HashMap<>();
+    HashMap<Book, TwoLongs>  stock= new HashMap<>();
 
-    public HashMap<Book, Long> getStock() {
+    public HashMap<Book, TwoLongs> getStock() {
         return stock;
     }
 
-    public void setStock(HashMap<Book, Long> stock) {
+    public void setStock(HashMap<Book, TwoLongs> stock) {
         this.stock = stock;
     }
     
